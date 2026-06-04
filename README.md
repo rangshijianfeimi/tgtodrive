@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  <strong><span style="font-size: 1.15em;">Telegram 交流群：<a href="https://t.me/TgtoDriveChat">https://t.me/TgtoDriveChat</a></span></strong>
+  <strong><span style="font-size: 1.25em;">Telegram 交流群：<a href="https://t.me/TgtoDriveChat">https://t.me/TgtoDriveChat</a></span></strong>
 </p>
 
 <p align="center">
@@ -96,8 +96,6 @@
 也就是说，项目不是“能生成 STRM”这么简单，而是已经形成了：
 
 **整理 → 增量检测 → STRM 更新 → 元数据同步 → 清理失效项** 的闭环。
-
-![115 分享 STRM](picture/115网盘-分享STRM生成与整理.png)
 
 ### 3. 🎬 Emby 反向代理 + 302 直链播放
 
@@ -179,45 +177,38 @@ mkdir -p db downloads strm
 
 ### 3. 编写 `docker-compose.yml`
 
-NAS / Linux 环境推荐使用 `host` 网络模式，便于 Web 管理端、Emby 反代端口和 STRM 播放地址保持一致。
-
 ```yaml
+version: '3'
+
 services:
-  tgtodrive:
+  tgtodrive-service:
     image: walkingd/tgto123:latest
     container_name: TgtoDrive
-    network_mode: host
-    restart: always
+    network_mode: host  # 推荐 host 模式以简化端口映射和直链访问
     environment:
-      TZ: Asia/Shanghai
-      ENV_WEB_PASSPORT: admin
-      ENV_WEB_PASSWORD: change_this_password
+      # --- 基础配置 ---
+      - TZ=Asia/Shanghai
+      # 必填：WEB管理页面的登录账号密码
+      - ENV_WEB_PASSPORT=admin
+      - ENV_WEB_PASSWORD=password
     volumes:
-      # 持久化配置、数据库、日志、任务记录
+      # 数据库与日志持久化，右侧固定为/app/db
       - ./db:/app/db
-
-      # STRM 输出目录。左侧替换为你的媒体库目录，右侧固定为 /app/strm
-      - ./strm:/app/strm
-
-      # 视频下载输出目录，可按需删除
+      # STRM输出目录：用于保存 /app/strm 下生成内容,/vol1/1000/Emby/strm 改成你的目录，右侧固定为/app/strm
+      - /vol1/1000/Emby/strm:/app/strm
+      # [可选] B站、抖音等视频下载保存路径，不需要可去掉：右侧固定为/app/downloads
       - ./downloads:/app/downloads
+      # [可选] 本地文件无限尝试秒传网盘路径：左侧填NAS本地路径，不需要可去掉：右侧固定为/app/upload
+      - /vol3/1000/Video/MoviePilot/transfer:/app/upload
 
-      # 本地文件秒传扫描目录，可按需删除
-      # - /your/nas/transfer:/app/upload
+    restart: always
 ```
 
-如无法使用 `host` 网络模式，可按实际环境映射 Web 管理端口：
-
-```yaml
-ports:
-  - "12366:12366"
-```
-
-### 4. 启动
+### 4. 启动服务
 
 ```bash
-docker compose pull
-docker compose up -d
+docker-compose pull  # 拉取最新镜像
+docker-compose up -d # 后台启动
 ```
 
 访问 Web 管理台：
