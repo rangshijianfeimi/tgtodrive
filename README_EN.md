@@ -2,10 +2,10 @@
   <img src="picture/LOGO.png" alt="TgtoDrive" width="180">
 </p>
 
-<h1 align="center">TgtoDrive</h1>
+<h1 align="center">🎬 TgtoDrive (TTD)</h1>
 
 <p align="center">
-  <strong>A Dockerized automation platform for cloud-drive media libraries</strong>
+  <strong>Cloud-drive media automation assistant</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,19 @@
 </p>
 
 <p align="center">
-  <a href="README.md">中文</a> | English | Telegram Community: <a href="https://t.me/TgtoDriveChat">https://t.me/TgtoDriveChat</a>
+  <a href="README.md">中文</a> | English
+</p>
+
+<p align="center">
+  <strong><span style="font-size: 1.25em;">Telegram Community: <a href="https://t.me/TgtoDriveChat">https://t.me/TgtoDriveChat</a></span></strong>
+</p>
+
+<p align="center">
+  <strong>An all-in-one cloud-drive media automation platform: from resource discovery, automatic transfer, smart organization and STRM mounting to Emby 302 direct-link playback. It focuses on 115 / 123 Cloud Drive organization, full and incremental 115 / 123 STRM generation, and Emby reverse-proxy 302 playback.</strong>
+</p>
+
+<p align="center">
+  <strong>This software is completely free and will remain free. If this project helps you, please click the ⭐ Star button in the upper-right corner to support it.</strong>
 </p>
 
 ---
@@ -106,8 +118,6 @@ TgtoDrive can turn transferred files into a cleaner media library for Emby, Jell
 | Invalid cleanup | Remove invalid STRM files and empty directories |
 | Deep delete | Trigger cloud-drive cleanup after media deletion in Emby |
 
-![Shared STRM](picture/115网盘-分享STRM生成与整理.png)
-
 ### Emby integration
 
 | Feature | Description |
@@ -150,45 +160,38 @@ mkdir -p db downloads strm
 
 ### 3. Create `docker-compose.yml`
 
-For NAS / Linux deployments, `host` networking is recommended so the Web console, Emby reverse-proxy ports and STRM playback base URLs remain straightforward.
-
 ```yaml
+version: '3'
+
 services:
-  tgtodrive:
+  tgtodrive-service:
     image: walkingd/tgto123:latest
     container_name: TgtoDrive
-    network_mode: host
-    restart: always
+    network_mode: host  # 推荐 host 模式以简化端口映射和直链访问
     environment:
-      TZ: Asia/Shanghai
-      ENV_WEB_PASSPORT: admin
-      ENV_WEB_PASSWORD: change_this_password
+      # --- 基础配置 ---
+      - TZ=Asia/Shanghai
+      # 必填：WEB管理页面的登录账号密码
+      - ENV_WEB_PASSPORT=admin
+      - ENV_WEB_PASSWORD=password
     volumes:
-      # Persistent configuration, database, logs and task records
+      # 数据库与日志持久化，右侧固定为/app/db
       - ./db:/app/db
-
-      # STRM output folder. Replace the left side with your media-library path.
-      - ./strm:/app/strm
-
-      # Optional video download folder
+      # STRM输出目录：用于保存 /app/strm 下生成内容,/vol1/1000/Emby/strm 改成你的目录，右侧固定为/app/strm
+      - /vol1/1000/Emby/strm:/app/strm
+      # [可选] B站、抖音等视频下载保存路径，不需要可去掉：右侧固定为/app/downloads
       - ./downloads:/app/downloads
+      # [可选] 本地文件无限尝试秒传网盘路径：左侧填NAS本地路径，不需要可去掉：右侧固定为/app/upload
+      - /vol3/1000/Video/MoviePilot/transfer:/app/upload
 
-      # Optional local-file fast-import scan folder
-      # - /your/nas/transfer:/app/upload
+    restart: always
 ```
 
-If `host` networking is not available, map the Web-console port manually:
-
-```yaml
-ports:
-  - "12366:12366"
-```
-
-### 4. Start
+### 4. Start the service
 
 ```bash
-docker compose pull
-docker compose up -d
+docker-compose pull  # Pull the latest image
+docker-compose up -d # Start in the background
 ```
 
 Open the Web console:
@@ -241,58 +244,249 @@ Recommended backup items:
 - `db/`: configuration, history, logs and task state.
 - `strm/`: generated STRM media library.
 
-## Screenshot Index
+## Feature Screenshots
 
 ### System Tools
 
-- [Emby Dashboard](picture/Emby看板.png)
-- [Emby Reverse Proxy](picture/Emby反代.png)
-- [Global Settings](picture/全局设置.png)
-- [Logs](picture/日志中心.png)
-- [Transfer History](picture/监控历史.png)
-- [Organize History](picture/整理历史.png)
-- [Toolbox](picture/实用工具.png)
-- [SSH Terminal](picture/SSH终端.png)
+#### Emby Dashboard
+
+Shows Emby-related service status, media-library information and playback workflow visibility, so you can quickly check whether the media stack is healthy.
+
+![Emby Dashboard](picture/Emby看板.png)
+
+#### Emby Reverse Proxy
+
+Configures Emby reverse-proxy instances, including Emby URL, API key, listen port and 302 direct-link playback options.
+
+![Emby Reverse Proxy](picture/Emby反代.png)
+
+#### Global Settings
+
+Centralizes proxy settings, Telegram main-bot settings, TMDB key and channel-monitoring polling options.
+
+![Global Settings](picture/全局设置.png)
+
+#### Logs
+
+Displays service logs, task execution records and errors. This is the primary place to troubleshoot transfers, organization, STRM generation and reverse-proxy playback.
+
+![Logs](picture/日志中心.png)
+
+#### Transfer History
+
+Shows resources matched by channel monitoring, their transfer status, message sources and handling results.
+
+![Transfer History](picture/监控历史.png)
+
+#### Organize History
+
+Shows media recognition, classification, renaming, upgrade and move records from cloud-drive organization tasks.
+
+![Organize History](picture/整理历史.png)
+
+#### Toolbox
+
+Provides manual utility actions and maintenance tasks for troubleshooting or one-off resource handling.
+
+![Toolbox](picture/实用工具.png)
 
 ### 115 Cloud Drive
 
-- [115 Account](picture/115网盘-115账号配置.png)
-- [HDHive Account](picture/115网盘-影巢账号配置.png)
-- [115 Channel Monitoring](picture/115网盘-115频道监控配置.png)
-- [HDHive Channel Monitoring](picture/115网盘-影巢频道监控配置.png)
-- [Organizer](picture/115网盘-网盘整理功能.png)
-- [STRM](picture/115网盘-STRM生成.png)
-- [Shared STRM](picture/115网盘-分享STRM生成与整理.png)
-- [Link Transfer](picture/115网盘-链接转存.png)
-- [Offline Settings](picture/115网盘-离线设置.png)
-- [Cleanup](picture/115网盘-自动清理.png)
+#### 115 Account
+
+Configures 115 account login, Cookie, QR login and account status checks. It is the base for 115 transfer, organization, STRM and direct-link workflows.
+
+![115 Account](picture/115网盘-115账号配置.png)
+
+#### HDHive Account
+
+Configures HDHive account information for resource search, channel monitoring, link transfer and points-threshold controls.
+
+![HDHive Account](picture/115网盘-影巢账号配置.png)
+
+#### 115 Channel Monitoring
+
+Configures 115 resource-channel monitoring rules, including channel IDs, target folders, keyword allowlists, blocklists and routing rules.
+
+![115 Channel Monitoring](picture/115网盘-115频道监控配置.png)
+
+#### HDHive Channel Monitoring
+
+Configures HDHive channel monitoring and transfer rules, including keywords, target folders and trigger conditions.
+
+![HDHive Channel Monitoring](picture/115网盘-影巢频道监控配置.png)
+
+#### Organizer
+
+Scans 115 cloud-drive media folders and uses TMDB recognition to classify, rename, archive and upgrade media files.
+
+![115 Organizer](picture/115网盘-网盘整理功能.png)
+
+#### STRM
+
+Generates STRM files from 115 folders with full scans, incremental refresh, metadata sync and invalid-item cleanup.
+
+![115 STRM](picture/115网盘-STRM生成.png)
+
+#### Shared STRM
+
+Generates and organizes STRM files from shared 115 resources, bringing shared links into the local media-library playback workflow.
+
+![115 Shared STRM](picture/115网盘-分享STRM生成与整理.png)
+
+#### Link Transfer
+
+Handles 115 shared links and saves resources to target folders, then passes them into the organization workflow when needed.
+
+![115 Link Transfer](picture/115网盘-链接转存.png)
+
+#### Offline Settings
+
+Configures 115 offline-download options for magnet, ed2k and torrent tasks.
+
+![115 Offline Settings](picture/115网盘-离线设置.png)
+
+#### Cleanup
+
+Configures automatic cleanup rules for expired, invalid or no-longer-needed 115 resources and folders.
+
+![115 Cleanup](picture/115网盘-自动清理.png)
 
 ### 123 Cloud Drive
 
-- [123 Account](picture/123云盘-123账号配置.png)
-- [Channel Monitoring](picture/123云盘-频道监控配置.png)
-- [Organizer](picture/123云盘-网盘整理功能.png)
-- [STRM](picture/123云盘-STRM生成.png)
-- [Transfer and JSON Fast Import](picture/123云盘-转存与秒传JSON.png)
-- [Offline Settings](picture/123云盘-离线设置.png)
-- [Fast Import from 115, Tianyi and Quark](picture/123云盘-秒传115、天翼、夸克.png)
-- [Share Monitor](picture/123云盘-分享转存监控.png)
-- [Share Generation](picture/123云盘-分享链接生成.png)
+#### 123 Account
 
-### Tianyi and Other Integrations
+Configures 123 account credentials, token, folders and status checks. It is the base for 123 transfer, fast import, organization and STRM workflows.
 
-- [Tianyi Account](picture/天翼云盘-天翼账号配置.png)
-- [Tianyi Channel Monitoring](picture/天翼云盘-频道监控配置.png)
-- [Tianyi Link Transfer](picture/天翼云盘-链接转存.png)
-- [Tianyi Cleanup](picture/天翼云盘-自动清理.png)
-- [Universal Forwarding and TG API](picture/万能转发与TGAPI配置.png)
-- [Pansou Aggregation Search](picture/Pansou聚合搜索配置.png)
-- [WeCom Notifications](picture/微信通知配置.png)
-- [Community Posting](picture/资源社区配置.png)
-- [Local File Fast Import](picture/本地文件秒传配置.png)
-- [Emby Missing Poster Refresh](picture/Emby缺失海报检测与刷新.png)
-- [Server Connectivity Checks](picture/服务器连通性检测.png)
-- [Video Download](picture/视频下载功能.png)
+![123 Account](picture/123云盘-123账号配置.png)
+
+#### Channel Monitoring
+
+Configures 123 resource-channel monitoring rules and automatically transfers Telegram channel resources to target 123 folders.
+
+![123 Channel Monitoring](picture/123云盘-频道监控配置.png)
+
+#### Organizer
+
+Scans 123 cloud-drive media resources and uses TMDB recognition to classify, rename, archive and upgrade media files.
+
+![123 Organizer](picture/123云盘-网盘整理功能.png)
+
+#### STRM
+
+Generates STRM files from 123 folders for Emby, Jellyfin, Plex and other media-library tools.
+
+![123 STRM](picture/123云盘-STRM生成.png)
+
+#### Transfer and JSON Fast Import
+
+Configures 123 share-link transfer and JSON fast-import workflows for batch importing existing resource lists.
+
+![123 Transfer and JSON Fast Import](picture/123云盘-转存与秒传JSON.png)
+
+#### Offline Settings
+
+Configures 123 offline-download tasks for magnet, ed2k and torrent links.
+
+![123 Offline Settings](picture/123云盘-离线设置.png)
+
+#### Fast Import from 115, Tianyi and Quark
+
+Configures cross-drive fast import from 115, Tianyi, Quark and related sources into 123 Cloud Drive.
+
+![123 Fast Import from 115, Tianyi and Quark](picture/123云盘-秒传115、天翼、夸克.png)
+
+#### Share Monitor
+
+Monitors incremental changes in 123 share links and automatically transfers newly added files to target folders.
+
+![123 Share Monitor](picture/123云盘-分享转存监控.png)
+
+#### Share Generation
+
+Generates 123 Cloud Drive share links for search, forwarding and resource-publishing workflows.
+
+![123 Share Generation](picture/123云盘-分享链接生成.png)
+
+### Tianyi Cloud Drive and Other Integrations
+
+#### Tianyi Account
+
+Configures Tianyi account login information for Tianyi transfer, monitoring and cleanup workflows.
+
+![Tianyi Account](picture/天翼云盘-天翼账号配置.png)
+
+#### Tianyi Channel Monitoring
+
+Configures Tianyi resource-channel monitoring and transfers Tianyi shared resources to target folders.
+
+![Tianyi Channel Monitoring](picture/天翼云盘-频道监控配置.png)
+
+#### Tianyi Link Transfer
+
+Handles Tianyi Cloud Drive shared links and transfers linked resources into the configured account.
+
+![Tianyi Link Transfer](picture/天翼云盘-链接转存.png)
+
+#### Tianyi Cleanup
+
+Configures automatic cleanup rules for expired Tianyi resources or temporary files.
+
+![Tianyi Cleanup](picture/天翼云盘-自动清理.png)
+
+#### SSH Terminal
+
+Connects to remote servers from the Web console, making it easier to inspect the deployment environment, container state and mounted folders.
+
+![SSH Terminal](picture/SSH终端.png)
+
+#### Universal Forwarding and TG API
+
+Configures Telegram API and universal forwarding so private, restricted or user-forwarded messages can still enter the automation workflow.
+
+![Universal Forwarding and TG API](picture/万能转发与TGAPI配置.png)
+
+#### Pansou Aggregation Search
+
+Configures Pansou aggregation search for keyword-based discovery across multiple cloud-drive resource sources.
+
+![Pansou Aggregation Search](picture/Pansou聚合搜索配置.png)
+
+#### WeCom Notifications
+
+Configures WeCom notifications for transfer results, organization results, task completion and error messages.
+
+![WeCom Notifications](picture/微信通知配置.png)
+
+#### Community Posting
+
+Configures resource-community posting so organized resource information can be published according to rules.
+
+![Community Posting](picture/资源社区配置.png)
+
+#### Local File Fast Import
+
+Scans local PT or download folders and attempts fast import into 123 / 115 to reduce repeated upload traffic.
+
+![Local File Fast Import](picture/本地文件秒传配置.png)
+
+#### Emby Missing Poster Refresh
+
+Detects media items with missing posters in Emby and triggers refresh tasks to improve library presentation.
+
+![Emby Missing Poster Refresh](picture/Emby缺失海报检测与刷新.png)
+
+#### Server Connectivity Checks
+
+Tests network connectivity from the server to Telegram, cloud drives, TMDB, Emby and other key services.
+
+![Server Connectivity Checks](picture/服务器连通性检测.png)
+
+#### Video Download
+
+Configures and runs video download tasks, saving downloaded files into mapped container folders for later organization or library import.
+
+![Video Download](picture/视频下载功能.png)
 
 ## FAQ
 
