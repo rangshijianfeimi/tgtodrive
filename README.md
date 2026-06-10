@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="picture/tgtodrive-brand.png" alt="TgtoDrive：把网盘资源从转存推进到可播放媒体库" width="100%">
+  <img src="picture/tgtodrive-brand-new.png" alt="TgtoDrive：把网盘资源从转存推进到可播放媒体库" width="100%">
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@
 
 ## ✨ 核心定位：找资源 → 转存 → 整理 → 挂 STRM → Emby 播放
 
-你可以把它理解成一个“网盘媒体库自动化流水线”： 
+你可以把它理解成一个“网盘媒体库自动化流水线”：
 
 1. **找资源**：通过 Telegram 频道监控、榜单订阅、关键词白名单、Pansou、Nullbr、影巢等入口发现资源。
 2. **转存资源**：自动把 123 / 115 / 光鸭 / 天翼 / 夸克 / 影巢 / 分享链接资源转存到目标网盘目录。
