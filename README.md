@@ -1,11 +1,5 @@
 <p align="center">
-  <img src="picture/LOGO.png" alt="TgtoDrive" width="180">
-</p>
-
-<h1 align="center">🎬 TgtoDrive (TTD)</h1>
-
-<p align="center">
-  <strong>网盘资源自动化管理助手</strong>
+  <img src="picture/tgtodrive-brand.png" alt="TgtoDrive：把网盘资源从转存推进到可播放媒体库" width="100%">
 </p>
 
 <p align="center">
@@ -15,7 +9,7 @@
   <a href="https://hub.docker.com/r/walkingd/tgto123">
     <img src="https://img.shields.io/badge/Docker%20Image-walkingd%2Ftgto123-2496ED?style=for-the-badge&logo=docker" alt="Docker Image">
   </a>
-  <img src="https://img.shields.io/badge/Version-8.3.3-6C63FF?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-8.3.7-6C63FF?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Arch-amd64%20%7C%20arm64-111827?style=for-the-badge" alt="Architecture">
 </p>
 
